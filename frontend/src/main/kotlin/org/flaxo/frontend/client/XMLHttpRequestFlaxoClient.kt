@@ -7,6 +7,7 @@ import org.flaxo.common.data.Course
 import org.flaxo.common.data.CourseSettings
 import org.flaxo.common.data.CourseStatistics
 import org.flaxo.common.data.GithubAuthData
+import org.flaxo.common.data.PlagiarismReport
 import org.flaxo.common.data.Solution
 import org.flaxo.common.data.SolutionReview
 import org.flaxo.common.data.Task
@@ -130,11 +131,15 @@ class XMLHttpRequestFlaxoClient(private val baseUrl: String) : FlaxoClient {
         // TODO 23.03.19: Delete course but not the repository.
     }
 
-    override suspend fun analysePlagiarism(credentials: Credentials, courseName: String, task: String): Unit =
+    override suspend fun analysePlagiarism(credentials: Credentials,
+                                           courseName: String,
+                                           task: String
+    ): PlagiarismReport =
             post {
                 apiMethod = "/plagiarism/analyse"
                 params = mapOf(COURSE_NAME to courseName, TASK_BRANCH to task)
                 creds = credentials
+                onSuccess = { response -> json.parse(PlagiarismReport.serializer(), response) }
                 errorMessage = "Plagiarism analysis failed."
             }
 
@@ -164,12 +169,13 @@ class XMLHttpRequestFlaxoClient(private val baseUrl: String) : FlaxoClient {
                                       courseName: String,
                                       task: String,
                                       scores: Map<String, Int>
-    ): Unit =
+    ): List<Solution> =
             post {
                 apiMethod = "/task/update/scores"
                 params = mapOf(COURSE_NAME to courseName, TASK_BRANCH to task)
                 creds = credentials
                 body = json.stringify((String.serializer() to Int.serializer()).map, scores)
+                onSuccess = { response -> json.parse(Solution.serializer().list, response) }
                 errorMessage = "Task scores updating failed."
             }
 
@@ -195,6 +201,14 @@ class XMLHttpRequestFlaxoClient(private val baseUrl: String) : FlaxoClient {
                 creds = credentials
                 params = mapOf(COURSE_NAME to courseName)
                 errorMessage = "Activating travis for course failed."
+            }
+
+    override suspend fun activateGitplag(credentials: Credentials, courseName: String): Unit =
+            post {
+                apiMethod = "/course/activate/gitplag"
+                creds = credentials
+                params = mapOf(COURSE_NAME to courseName)
+                errorMessage = "Activating gitplag for course failed."
             }
 
     override suspend fun downloadStatistics(credentials: Credentials, courseName: String, format: String): dynamic =

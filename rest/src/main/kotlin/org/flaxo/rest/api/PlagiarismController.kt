@@ -1,9 +1,10 @@
 package org.flaxo.rest.api
 
 import org.apache.commons.collections4.map.PassiveExpiringMap
+import org.flaxo.common.data.PlagiarismReport
 import org.flaxo.common.data.plagiarism.PlagiarismGraph
 import org.flaxo.common.of
-import org.flaxo.rest.manager.plagiarism.PlagiarismManager
+import org.flaxo.rest.manager.plag.PlagiarismManager
 import org.flaxo.rest.manager.response.Response
 import org.flaxo.rest.manager.response.ResponseManager
 import org.springframework.security.access.prepost.PreAuthorize
@@ -41,7 +42,7 @@ class PlagiarismController(private val plagiarismManager: PlagiarismManager,
     fun analysePlagiarism(@RequestParam courseName: String,
                           @RequestParam taskBranch: String,
                           principal: Principal
-    ): Response<Unit> = responseManager.ok(plagiarismManager.analyse(principal.name, courseName, taskBranch))
+    ): Response<PlagiarismReport> = responseManager.ok(plagiarismManager.analyse(principal.name, courseName, taskBranch))
 
     /**
      * Generates task latest plagiarism report graph temporary access token.

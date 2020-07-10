@@ -24,5 +24,25 @@ data class CourseSettings(
         /**
          * Testing programming language framework.
          */
-        val testingFramework: String?
+        val testingFramework: String?,
+
+        /**
+         * File pattern for plagiarism analysis.
+         */
+        val plagiarismFilePattern: String?,
+
+        /**
+         * Plagiarism analysis backend.
+         */
+        val plagiarismBackend: PlagiarismBackend,
+
+        /**
+         * Flag that enables notifications on solution score update.
+         */
+        val notificationOnScoreChange: Boolean,
+
+        /**
+         * Notification template that will be used to notify student on solution score update.
+         */
+        val scoreChangeNotificationTemplate: String?
 ) : Identifiable

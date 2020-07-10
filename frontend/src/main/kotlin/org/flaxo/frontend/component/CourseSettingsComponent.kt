@@ -7,11 +7,14 @@ import org.flaxo.common.Framework
 import org.flaxo.common.Language
 import org.flaxo.common.data.Course
 import org.flaxo.common.data.CourseSettings
+import org.flaxo.common.data.PlagiarismBackend
 import org.flaxo.frontend.Container
 import org.flaxo.frontend.Notifications
 import org.flaxo.frontend.OnCourseChange
 import org.flaxo.frontend.client.FlaxoClient
 import org.flaxo.frontend.client.FlaxoHttpException
+import org.flaxo.frontend.component.bootstrap.flagComponent
+import org.flaxo.frontend.component.bootstrap.inputComponent
 import org.flaxo.frontend.component.bootstrap.selectComponent
 import org.flaxo.frontend.credentials
 import react.RBuilder
@@ -43,6 +46,10 @@ private class CourseSettingsComponent(props: CourseSettingsProps)
     private val courseLanguageSetting = "courseLanguageSetting-" + props.course.id
     private val courseTestingLanguageSetting = "courseTestingLanguageSetting-" + props.course.id
     private val courseTestingFrameworkSetting = "courseTestingFrameworkSetting-" + props.course.id
+    private val coursePlagiarismAnalysisFilePatternSetting =
+            "coursePlagiarismAnalysisFilePatternSetting-"+ props.course.id
+    private val coursePlagiarismAnalysisBackendSetting = "coursePlagiarismAnalysisBackendSetting-" + props.course.id
+    private val scoreChangeNotificationTemplateSetting = "scoreMessageTemplateSetting-" + props.course.id
 
     init {
         flaxoClient = Container.flaxoClient
@@ -55,6 +62,10 @@ private class CourseSettingsComponent(props: CourseSettingsProps)
                 languageSelect()
                 testingLanguageSelect()
                 testingFrameworkSelect()
+                plagiarismAnalysisFilePatternInput()
+                plagiarismAnalysisBackendSelect()
+                scoreChangeNotificationFlag()
+                scoreChangeNotificationTemplateInput()
             }
             button(classes = "btn btn-primary") {
                 attrs {
@@ -99,6 +110,59 @@ private class CourseSettingsComponent(props: CourseSettingsProps)
                 options = Framework.values().map { it.alias },
                 emptyOption = true,
                 onUpdate = { setState { settings = settings.copy(testingFramework = it.ifBlank { null }) } }
+        )
+    }
+
+    private fun RBuilder.plagiarismAnalysisFilePatternInput() {
+        inputComponent(inputId = coursePlagiarismAnalysisFilePatternSetting,
+                name = "File pattern for plagiarism analysis",
+                description = "Regular expression which will be used to filter repository files " +
+                        "for plagiarism analysis. Leave the pattern blank to use a default one " +
+                        "(course language source file extensions).",
+                default = state.settings.plagiarismFilePattern,
+                onUpdate = { setState { settings = settings.copy(plagiarismFilePattern = it.ifBlank { null }) } }
+        )
+    }
+
+    private fun RBuilder.plagiarismAnalysisBackendSelect() {
+        selectComponent(selectId = coursePlagiarismAnalysisBackendSetting,
+                name = "Plagiarism analysis backend",
+                description = "Plagiarism analysis backend which will be used for all tasks in the course.",
+                default = state.settings.plagiarismBackend.name,
+                options = PlagiarismBackend.values().map { it.name },
+                emptyOption = false,
+                onUpdate = {
+                    setState {
+                        settings = settings.copy(plagiarismBackend = it.ifBlank { null }
+                                ?.let { PlagiarismBackend.valueOf(it) }
+                                ?: PlagiarismBackend.MOSS)
+                    }
+                }
+        )
+    }
+
+    private fun RBuilder.scoreChangeNotificationFlag() {
+        flagComponent(inputId = scoreChangeNotificationTemplateSetting,
+                name = "Enables notifications on score change",
+                description = "Notifications will be sent to students on solutions score change.",
+                default = state.settings.notificationOnScoreChange,
+                onUpdate = { setState { settings = settings.copy(notificationOnScoreChange = it) } }
+        )
+    }
+
+    private fun RBuilder.scoreChangeNotificationTemplateInput() {
+        inputComponent(inputId = scoreChangeNotificationTemplateSetting,
+                name = "Score change notification template",
+                description = "Template of the notification that will be sent to students on solutions score change. " +
+                        "Use any Markdown constructions and a single %s to inject score to notification. " +
+                        "Leave template blank to use a default one.",
+                default = state.settings.scoreChangeNotificationTemplate,
+                disabled = !state.settings.notificationOnScoreChange,
+                onUpdate = {
+                    setState {
+                        settings = settings.copy(scoreChangeNotificationTemplate = it.ifBlank { null })
+                    }
+                }
         )
     }
 

@@ -8,6 +8,7 @@ import com.nhaarman.mockito_kotlin.verify
 import org.amshove.kluent.shouldEqual
 import org.amshove.kluent.shouldThrow
 import org.flaxo.common.data.CourseSettings
+import org.flaxo.common.data.PlagiarismBackend
 import org.flaxo.model.DataManager
 import org.flaxo.model.data.Course
 import org.flaxo.model.data.User
@@ -24,9 +25,13 @@ class CourseManagerSpec : SubjectSpek<CourseManager>({
     val course = Course(id = 1, name = "course", user = user)
     val anotherUser = User(id = 2, name = "anotherUser")
     val settings = CourseSettings(id = 1, language = "language", testingLanguage = "testingLanguage",
-            testingFramework = "testingFramework")
+            testingFramework = "testingFramework", notificationOnScoreChange = false,
+            scoreChangeNotificationTemplate = null, plagiarismFilePattern = null,
+            plagiarismBackend = PlagiarismBackend.MOSS)
     val anotherSettings = CourseSettings(id = 2, language = "anotherLanguage",
-            testingLanguage = "anotherTestingLanguage", testingFramework = "anotherTestingFramework")
+            testingLanguage = "anotherTestingLanguage", testingFramework = "anotherTestingFramework",
+            notificationOnScoreChange = false, scoreChangeNotificationTemplate = null,
+            plagiarismFilePattern = null, plagiarismBackend = PlagiarismBackend.MOSS)
 
     val dataManager = mock<DataManager> {
         on { getUser(eq(user.name)) }.thenReturn(user)
