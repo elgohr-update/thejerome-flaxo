@@ -15,7 +15,7 @@ jobs:
         id: release-tag-resolver
         run: echo ::set-env name=VERSION::$(echo ${GITHUB_SHA})
       - name: Build and publish image
-        uses: elgohr/Publish-Docker-Github-Action@2.8
+        uses: elgohr/Publish-Docker-Github-Action@v5
         with:
           name: flaxo/frontend:${{ github.sha }}
           dockerfile: docker/images/frontend/Dockerfile
@@ -31,7 +31,7 @@ jobs:
         id: release-tag-resolver
         run: echo ::set-env name=VERSION::$(echo ${GITHUB_SHA})
       - name: Build and publish image
-        uses: elgohr/Publish-Docker-Github-Action@2.8
+        uses: elgohr/Publish-Docker-Github-Action@v5
         env:
           GITHUB_USER1_NAME: ${{ secrets.GITHUB_USER1_NAME }}
           GITHUB_USER1_TOKEN: ${{ secrets.GITHUB_USER1_TOKEN }}
